@@ -2,7 +2,7 @@ class ApiError(Exception):
     def __init__(self, *args, **kwargs):
         if kwargs:
             args += (kwargs,)
-        super(ApiError, self).__init__(*args)
+        super().__init__(*args)
         kwargs.pop('args', None)
         self.__dict__.update(kwargs)
 

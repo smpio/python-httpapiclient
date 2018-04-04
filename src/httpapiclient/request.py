@@ -9,7 +9,7 @@ class ApiRequest(requests.Request):
             self._is_idempotent = kwargs.pop('is_idempotent')
         except KeyError:
             pass
-        super(ApiRequest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @property
     def is_idempotent(self):

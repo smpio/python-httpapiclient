@@ -56,12 +56,13 @@ class BaseApiClient(metaclass=BaseApiClientMetaclass):
             except self.ClientError as e:
                 if e.permanent:
                     raise e
+                log.debug('Request failed: %r', e)
+                errors.append(e)
             except self.ServerError as e:
                 if not request.is_idempotent and e.has_side_effects:
                     raise e
-
-            log.debug('Request failed: %r', e)
-            errors.append(e)
+                log.debug('Request failed: %r', e)
+                errors.append(e)
 
         raise errors[-1]
 
