@@ -1,7 +1,4 @@
-import contextlib
-
-from utils.apiclient import ApiRequest, DEFAULT_TIMEOUT
-from httpapiclient import exceptions
+from . import exceptions, ApiRequest, DEFAULT_TIMEOUT
 
 
 class JsonResponseMixin:
@@ -28,26 +25,9 @@ class JsonResponseMixin:
         return result
 
 
-class RateLimitMixin:
-    rate_limits = []
-
-    def _request_once(self, *args, **kwargs):
-        from utils.lock import DistributedLockingRateLimiter
-
-        # TODO: optimize
-        rate_limiters = (DistributedLockingRateLimiter(rate_hz, limiter_name)
-                         for rate_hz, limiter_name in self.rate_limits)
-        ctx_managers = (limiter.get_time_frame() for limiter in rate_limiters)
-
-        with contextlib.ExitStack() as stack:
-            for ctx in ctx_managers:
-                stack.enter_context(ctx)
-            return super()._request_once(*args, **kwargs)
-
-
 class HelperMethodsMixinMetaclass(type):
-    def __new__(mcs, *args, **kwargs):
-        klass = super().__new__(mcs, *args, **kwargs)
+    def __new__(mcs, name, bases, attrs):
+        klass = super().__new__(mcs, name, bases, attrs)
 
         def add_method(name):
             name_upper = name.upper()

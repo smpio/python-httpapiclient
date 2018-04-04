@@ -8,12 +8,12 @@ from .exceptions import ApiClientError, ApiServerError
 
 log = logging.getLogger(__name__)
 
-DEFAULT_TIMEOUT = object()
+DEFAULT_TIMEOUT = type('DEFAULT_TIMEOUT', (), {})()
 
 
 class BaseApiClientMetaclass(type):
-    def __new__(mcs, *args, **kwargs):
-        klass = super().__new__(mcs, *args, **kwargs)
+    def __new__(mcs, name, bases, attrs):
+        klass = super().__new__(mcs, name, bases, attrs)
 
         class ClientError(ApiClientError):
             client_class = klass
@@ -37,7 +37,7 @@ class BaseApiClient(metaclass=BaseApiClientMetaclass):
 
     def request(self, request, timeout=DEFAULT_TIMEOUT):
         request.url = urllib.parse.urljoin(self.base_url, request.url)
-        prepeared = self.session.prepare_request(request)
+        prepared = self.session.prepare_request(request)
 
         if timeout is DEFAULT_TIMEOUT:
             timeout = self.default_timeout
@@ -51,28 +51,24 @@ class BaseApiClient(metaclass=BaseApiClientMetaclass):
                 time.sleep(backoff_time)
                 backoff_time *= 2
 
-            error = None
-
             try:
-                return self._request_once(request, prepeared, timeout)
+                return self._request_once(request, prepared, timeout)
             except self.ClientError as e:
-                error = e
                 if e.permanent:
                     raise e
             except self.ServerError as e:
-                error = e
                 if not request.is_idempotent and e.has_side_effects:
                     raise e
 
-            log.debug('Request failed: %r', error)
-            errors.append(error)
+            log.debug('Request failed: %r', e)
+            errors.append(e)
 
         raise errors[-1]
 
     def _request_once(self, request, prepeared, timeout):
         try:
             response = self.session.send(prepeared, timeout=timeout)
-        except (requests.ConnectionError, requests.ConnectTimeout) as e:
+        except requests.ConnectionError as e:
             raise self.ServerError(level='socket', reason=e, has_side_effects=False)
         except requests.ReadTimeout as e:
             raise self.ServerError(level='socket', reason=e)
