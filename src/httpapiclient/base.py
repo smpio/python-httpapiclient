@@ -21,8 +21,13 @@ class BaseApiClientMetaclass(type):
         class ServerError(ApiServerError):
             client_class = klass
 
+        class NotFoundError(ClientError):
+            pass
+
         klass.ClientError = ClientError
         klass.ServerError = ServerError
+        klass.NotFoundError = NotFoundError
+
         return klass
 
 
@@ -89,11 +94,17 @@ class BaseApiClient(metaclass=BaseApiClientMetaclass):
         non-idempotent request. For example - http 503.
         """
         code = response.status_code
+        err_class = None
 
         if 400 <= code < 500:
-            raise self.ClientError(level='http', code=code, status_text=response.reason, content=response.content)
-
+            if code == 404:
+                err_class = self.NotFoundError
+            else:
+                err_class = self.ClientError
         elif 500 <= code < 600:
-            raise self.ServerError(level='http', code=code, status_text=response.reason, content=response.content)
+            err_class = self.ServerError
+
+        if err_class:
+            raise err_class(level='http', code=code, status_text=response.reason, content=response.content)
 
         return response.content
