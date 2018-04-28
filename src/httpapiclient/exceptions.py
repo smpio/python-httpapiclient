@@ -1,8 +1,11 @@
+from __future__ import print_function, division, absolute_import, unicode_literals
+
+
 class ApiError(Exception):
     def __init__(self, *args, **kwargs):
         if kwargs:
             args += (kwargs,)
-        super().__init__(*args)
+        super(ApiError, self).__init__(*args)
         kwargs.pop('args', None)
         self.__dict__.update(kwargs)
 

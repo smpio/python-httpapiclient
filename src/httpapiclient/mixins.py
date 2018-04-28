@@ -1,12 +1,15 @@
+from __future__ import print_function, division, absolute_import, unicode_literals
+import six
+
 from . import exceptions, ApiRequest, DEFAULT_TIMEOUT
 
 
-class JsonResponseMixin:
+class JsonResponseMixin(object):
     def clean_response(self, response, request):
         from jsonschema import ValidationError
         from jsonschema import Draft4Validator
 
-        super().clean_response(response, request)
+        super(JsonResponseMixin, self).clean_response(response, request)
         try:
             result = response.json()
         except ValueError as e:
@@ -27,7 +30,7 @@ class JsonResponseMixin:
 
 class HelperMethodsMixinMetaclass(type):
     def __new__(mcs, name, bases, attrs):
-        klass = super().__new__(mcs, name, bases, attrs)
+        klass = super(HelperMethodsMixinMetaclass, mcs).__new__(mcs, name, bases, attrs)
 
         def add_method(name):
             name_upper = name.upper()
@@ -45,5 +48,5 @@ class HelperMethodsMixinMetaclass(type):
         return klass
 
 
-class HelperMethodsMixin(metaclass=HelperMethodsMixinMetaclass):
+class HelperMethodsMixin(six.with_metaclass(HelperMethodsMixinMetaclass)):
     request_class = ApiRequest

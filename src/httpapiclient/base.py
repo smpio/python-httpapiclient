@@ -1,8 +1,9 @@
+from __future__ import print_function, division, absolute_import, unicode_literals
+import six
 import time
 import logging
-import urllib.parse
-
 import requests
+from six.moves import urllib
 
 from .exceptions import ApiClientError, ApiServerError
 
@@ -13,7 +14,7 @@ DEFAULT_TIMEOUT = type('DEFAULT_TIMEOUT', (), {})()
 
 class BaseApiClientMetaclass(type):
     def __new__(mcs, name, bases, attrs):
-        klass = super().__new__(mcs, name, bases, attrs)
+        klass = super(BaseApiClientMetaclass, mcs).__new__(mcs, name, bases, attrs)
 
         class ClientError(ApiClientError):
             client_class = klass
@@ -31,7 +32,7 @@ class BaseApiClientMetaclass(type):
         return klass
 
 
-class BaseApiClient(metaclass=BaseApiClientMetaclass):
+class BaseApiClient(six.with_metaclass(BaseApiClientMetaclass)):
     base_url = None
     default_timeout = 6.1  # slightly larger than a multiple of 3, which is the default TCP packet retransmission window
     max_tries = 3

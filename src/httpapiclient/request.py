@@ -1,3 +1,4 @@
+from __future__ import print_function, division, absolute_import, unicode_literals
 import requests
 
 IDEMPOTENT_HTTP_METHODS = frozenset(['HEAD', 'GET', 'PUT', 'DELETE', 'OPTIONS', 'TRACE'])
@@ -9,7 +10,7 @@ class ApiRequest(requests.Request):
             self._is_idempotent = kwargs.pop('is_idempotent')
         except KeyError:
             pass
-        super().__init__(*args, **kwargs)
+        super(ApiRequest, self).__init__(*args, **kwargs)
 
     @property
     def is_idempotent(self):
