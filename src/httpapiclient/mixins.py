@@ -46,25 +46,21 @@ class JsonSchemaResponseMixin(JsonResponseMixin):
         return result
 
 
-class HelperMethodsMixinMetaclass(type):
-    def __new__(mcs, name, bases, attrs):
-        klass = super().__new__(mcs, name, bases, attrs)
+class HelperMethodsMixin:
+    request_class = ApiRequest
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         def add_method(name):
             name_upper = name.upper()
 
-            def method(self, path, timeout=DEFAULT_TIMEOUT, **kwargs):
-                request = klass.request_class(name_upper, path, **kwargs)
+            def method(path, timeout=DEFAULT_TIMEOUT, **kwargs):
+                request = self.request_class(name_upper, path, **kwargs)
                 return self.request(request, timeout=timeout)
 
             method.__name__ = method_name
-            setattr(klass, name, method)
+            setattr(self, name, method)
 
         for method_name in ('get', 'post', 'put', 'delete', 'patch'):
             add_method(method_name)
-
-        return klass
-
-
-class HelperMethodsMixin(metaclass=HelperMethodsMixinMetaclass):
-    request_class = ApiRequest
