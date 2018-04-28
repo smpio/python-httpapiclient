@@ -3,5 +3,5 @@ def get_content_type(response):
     if not header:
         return None
 
-    bits = header.split(';', maxsplit=1)
+    bits = header.split(';', 1)
     return bits[0].strip()

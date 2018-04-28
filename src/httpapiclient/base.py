@@ -9,7 +9,7 @@ from .exceptions import ApiClientError, ApiServerError
 
 log = logging.getLogger(__name__)
 
-DEFAULT_TIMEOUT = type('DEFAULT_TIMEOUT', (), {})()
+DEFAULT_TIMEOUT = type(b'DEFAULT_TIMEOUT', (), {})()
 
 
 class BaseApiClientMetaclass(type):
