@@ -1,16 +1,37 @@
-from . import exceptions, ApiRequest, DEFAULT_TIMEOUT
+from . import utils, exceptions, ApiRequest, DEFAULT_TIMEOUT
 
 
 class JsonResponseMixin:
     def clean_response(self, response, request):
+        try:
+            super().clean_response(response, request)
+        except exceptions.ApiError as err:
+            if utils.get_content_type(response) == 'application/json':
+                try:
+                    err.data = response.json()
+                except ValueError:
+                    pass
+            raise err
+
+        if request.raw_response:
+            return response
+        elif utils.get_content_type(response) == 'application/json':
+            try:
+                return response.json()
+            except ValueError as e:
+                raise self.ServerError(e, level='json')
+        else:
+            return response.content
+
+
+class JsonSchemaResponseMixin(JsonResponseMixin):
+    def clean_response(self, response, request):
         from jsonschema import ValidationError
         from jsonschema import Draft4Validator
 
-        super().clean_response(response, request)
-        try:
-            result = response.json()
-        except ValueError as e:
-            raise self.ServerError(e, level='json')
+        result = super().clean_response(response, request)
+        if request.raw_response:
+            return result
 
         try:
             schema = request.schema
