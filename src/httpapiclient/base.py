@@ -2,7 +2,7 @@ from __future__ import print_function, division, absolute_import, unicode_litera
 import six
 import time
 import logging
-import requests
+import requests.exceptions
 from six.moves import urllib
 
 from .exceptions import ApiClientError, ApiServerError
@@ -77,7 +77,7 @@ class BaseApiClient(six.with_metaclass(BaseApiClientMetaclass)):
             response = self.session.send(prepeared, timeout=timeout)
         except requests.ConnectionError as e:
             raise self.ServerError(level='socket', reason=e, has_side_effects=False)
-        except requests.ReadTimeout as e:
+        except requests.exceptions.ReadTimeout as e:
             raise self.ServerError(level='socket', reason=e)
         except requests.TooManyRedirects as e:
             raise self.ServerError(level='security', reason=e)
