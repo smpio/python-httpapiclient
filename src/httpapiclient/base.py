@@ -107,4 +107,7 @@ class BaseApiClient(metaclass=BaseApiClientMetaclass):
         if err_class:
             raise err_class(level='http', code=code, status_text=response.reason, content=response.content)
 
-        return response.content
+        if request.raw_response:
+            return response
+        else:
+            return response.content
