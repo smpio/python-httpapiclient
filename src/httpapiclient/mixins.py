@@ -13,7 +13,7 @@ class JsonResponseMixin:
                     pass
             raise err
 
-        if request.raw_response:
+        if hasattr(request, 'raw_response') and request.raw_response:
             return response
         elif utils.get_content_type(response) == 'application/json':
             try:
@@ -30,7 +30,7 @@ class JsonSchemaResponseMixin(JsonResponseMixin):
         from jsonschema import Draft4Validator
 
         result = super().clean_response(response, request)
-        if request.raw_response:
+        if hasattr(request, 'raw_response') and request.raw_response:
             return result
 
         try:
