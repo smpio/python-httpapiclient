@@ -62,5 +62,5 @@ class HelperMethodsMixin:
             method.__name__ = method_name
             setattr(self, name, method)
 
-        for method_name in ('get', 'post', 'put', 'delete', 'patch'):
+        for method_name in ('head', 'get', 'post', 'put', 'delete', 'patch'):
             add_method(method_name)
