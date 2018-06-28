@@ -74,8 +74,10 @@ class BaseApiClient(metaclass=BaseApiClientMetaclass):
     def _request_once(self, request, prepeared, timeout):
         try:
             response = self.session.send(prepeared, timeout=timeout)
-        except requests.ConnectionError as e:
+        except requests.ConnectTimeout as e:
             raise self.ServerError(level='socket', reason=e, has_side_effects=False)
+        except requests.ConnectionError as e:
+            raise self.ServerError(level='socket', reason=e)
         except requests.ReadTimeout as e:
             raise self.ServerError(level='socket', reason=e)
         except requests.TooManyRedirects as e:
