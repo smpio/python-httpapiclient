@@ -57,6 +57,7 @@ class HelperMethodsMixin(object):
             name_upper = name.upper()
 
             def method(path, timeout=DEFAULT_TIMEOUT, **kwargs):
+                kwargs = self._prepare_request_kwargs(kwargs)
                 request = self.request_class(name_upper, path, **kwargs)
                 return self.request(request, timeout=timeout)
 
@@ -65,3 +66,14 @@ class HelperMethodsMixin(object):
 
         for method_name in (b'head', b'get', b'post', b'put', b'delete', b'patch'):
             add_method(method_name)
+
+    def _prepare_request_kwargs(self, kwargs):
+        """
+        django-filters lookup type "__in" in most cases support only ?field__in=v1,v2,v3 syntax
+        also it makes your query params shorter
+        """
+        params = kwargs.get('params', {})
+        for param, value in params.items():
+            if param.endswith('__in') and isinstance(value, (set, list, tuple)):
+                params[param] = ','.join(value)
+        return kwargs
