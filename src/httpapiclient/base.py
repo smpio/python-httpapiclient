@@ -108,9 +108,8 @@ class BaseApiClient(metaclass=BaseApiClientMetaclass):
             err_class = self.ServerError
 
         if err_class:
-            exc = err_class(level='http', code=code, status_text=response.reason, content=response.content)
-            log.exception(exc, extra={'trace_id': trace_id})
-            raise exc
+            raise err_class(level='http', code=code, status_text=response.reason, content=response.content,
+                            trace_id=trace_id)
 
         if request.raw_response:
             return response
