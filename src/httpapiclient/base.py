@@ -96,6 +96,7 @@ class BaseApiClient(metaclass=BaseApiClientMetaclass):
         non-idempotent request. For example - http 503.
         """
         code = response.status_code
+        trace_id = response.headers.get('X-Trace-ID')
         err_class = None
 
         if 400 <= code < 500:
@@ -107,7 +108,9 @@ class BaseApiClient(metaclass=BaseApiClientMetaclass):
             err_class = self.ServerError
 
         if err_class:
-            raise err_class(level='http', code=code, status_text=response.reason, content=response.content)
+            exc = err_class(level='http', code=code, status_text=response.reason, content=response.content)
+            log.exception(exc, extra={'trace_id': trace_id})
+            raise exc
 
         if request.raw_response:
             return response
