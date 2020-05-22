@@ -41,7 +41,7 @@ class JsonSchemaResponseMixin(JsonResponseMixin):
         try:
             Draft4Validator(schema).validate(result)
         except ValidationError as e:
-            raise self.ServerError(e, schema=schema, level='json')
+            raise self.ServerError(description=str(e), schema=schema, level='json')
 
         return result
 
