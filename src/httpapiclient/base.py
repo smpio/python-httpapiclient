@@ -1,6 +1,7 @@
 import time
 import logging
 import urllib.parse
+from typing import ClassVar, Type
 
 import requests
 
@@ -32,10 +33,19 @@ class BaseApiClientMetaclass(type):
 
 
 class BaseApiClient(metaclass=BaseApiClientMetaclass):
-    base_url = None
-    default_timeout = 6.1  # slightly larger than a multiple of 3, which is the default TCP packet retransmission window
-    max_tries = 3
-    retry_backoff_factor = 0.5
+    # TypeHints for fields from metaclass (idk how to do it better):
+    ClientError: Type[ApiClientError]
+    ServerError: Type[ApiServerError]
+    NotFoundError: Type[ApiClientError]
+
+    # slightly larger than a multiple of 3, which is the default TCP packet retransmission window
+    default_timeout: ClassVar = 6.1
+    max_tries: ClassVar = 3
+    retry_backoff_factor: ClassVar = 0.5
+
+    @property
+    def base_url(self) -> str:
+        raise NotImplementedError('Api client base url')
 
     def __init__(self):
         self.session = requests.session()
