@@ -38,14 +38,11 @@ class BaseApiClient(metaclass=BaseApiClientMetaclass):
     ServerError: Type[ApiServerError]
     NotFoundError: Type[ApiClientError]
 
+    base_url: ClassVar = ''
     # slightly larger than a multiple of 3, which is the default TCP packet retransmission window
     default_timeout: ClassVar = 6.1
     max_tries: ClassVar = 3
     retry_backoff_factor: ClassVar = 0.5
-
-    @property
-    def base_url(self) -> str:
-        raise NotImplementedError('Api client base url')
 
     def __init__(self):
         self.session = requests.session()
